@@ -26,6 +26,7 @@ class DataLoader:
             transforms.Resize((450, 450)),
             transforms.ToTensor(),
         ])
+        self.encoder = LabelEncoder()
 
         self.X = None
         self.y = None
@@ -41,8 +42,7 @@ class DataLoader:
         # Load images and targets
         images = [self.__load_image__(image_name) for image_name in sampled_metadata[self.image_column]]
         self.X = torch.stack(images)
-        encoder = LabelEncoder()
-        self.y = torch.tensor(encoder.fit_transform(sampled_metadata[self.target_column].values), dtype=torch.long)
+        self.y = torch.tensor(self.encoder.fit_transform(sampled_metadata[self.target_column].values), dtype=torch.long)
 
     def __load_image__(self, image_name):
         image_path = os.path.join(self.images_dir, image_name) + ".jpg"
@@ -84,3 +84,7 @@ class DataLoader:
         if self.y is None:
             raise ValueError("The labels have not been loaded. Call load_images first.")
         return self.y
+
+    def get_encoder(self) -> LabelEncoder:
+
+        return self.encoder
