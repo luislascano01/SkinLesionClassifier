@@ -40,7 +40,7 @@ class Augmentation:
 
         aug_X = []
 
-        for image_tensor in tqdm(X_sample):
+        for image_tensor in tqdm(X_sample, "Performing Data Augmentation"):
             aug_X.append(augmentation_transforms(image_tensor))
 
         aug_X = torch.stack(aug_X)
@@ -56,11 +56,12 @@ class Augmentation:
 
             # Calculate the total size of the combined dataset
         total_size = self.X.size(0) + self.X_aug.size(0)
+        # print(f'Total size: {total_size}')
 
         # Generate a random permutation of indices for the combined dataset
         shuffling_indices = torch.randperm(total_size)
 
-        X_combined = torch.cat((self.X_aug, self.X))
-        y_combined = torch.cat((self.y_aug, self.y))
+        X_combined = torch.cat((self.X_aug, self.X), dim=0)
+        y_combined = torch.cat((self.y_aug, self.y), dim=0)
 
         return X_combined[shuffling_indices], y_combined[shuffling_indices]
