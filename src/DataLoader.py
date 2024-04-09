@@ -38,7 +38,6 @@ class DataLoader:
         Loads images from the dataset and augments a fraction of them.
         The augmented dataset will be larger by the specified fraction.
         :param load_fraction: Determines what fraction of the dataset to load. Usually used for testing purposes.
-        :param augmentation_fraction: A float specifying the fraction of the dataset to augment.
         """
 
         sampled_metadata = self.metadata.sample(frac=load_fraction)
@@ -54,9 +53,6 @@ class DataLoader:
             all_images.append(image)
             all_labels.append(label)
 
-        # Then, add augmented images with progress bar
-
-        # Convert lists to tensors
         self.X = torch.stack(all_images)
         self.y = torch.tensor(self.encoder.fit_transform(all_labels), dtype=torch.long)
 
