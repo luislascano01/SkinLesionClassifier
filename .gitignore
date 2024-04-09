@@ -1,0 +1,11 @@
+/skin_conditions_dataset/*
+
+/skin_conditions_dataset.zip
+
+/.idea/*
+/checkpoints/*
+
+/tensors/*
+/media_managers/*
+
+/.ipynb_checkpoints/*
