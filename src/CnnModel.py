@@ -10,8 +10,8 @@ class SkinConditionClassifier(nn.Module):
         # Load the pre-trained VGG19 model to leverage with transfer learning
         vgg19 = models.vgg19(weights=VGG19_Weights.IMAGENET1K_V1)
 
-        # Remove the last 4 layers from VGG19
-        modules = list(vgg19.features)[:-4]
+        # Remove the last 5 layers from VGG19
+        modules = list(vgg19.features)[:-5]
         self.vgg19_features = nn.Sequential(*modules)
 
         # Freeze the parameters (weights) of the VGG19 features
@@ -21,7 +21,7 @@ class SkinConditionClassifier(nn.Module):
         # Your custom deeper layers with dropout regularization
         self.custom_layers = nn.Sequential(
             # Add another convolutional block
-            nn.Conv2d(in_channels=512, out_channels=512, kernel_size=3, stride=1, padding=1),
+            nn.Conv2d(in_channels=512, out_channels=512, kernel_size=7, stride=1, padding=3),
             nn.BatchNorm2d(512),
             nn.LeakyReLU(inplace=True),
             nn.MaxPool2d(kernel_size=2, stride=2),
