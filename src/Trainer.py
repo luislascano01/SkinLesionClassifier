@@ -1,3 +1,5 @@
+import time
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -8,7 +10,7 @@ from torch.utils.data import DataLoader, TensorDataset
 
 
 class ModelTrainer:
-    def __init__(self, model, file_directory, num_classes, batch_size=32, lr=0.0005, weight_decay=2e-4, num_epochs=40,
+    def __init__(self, model, file_directory, num_classes, batch_size=30, lr=0.0004, weight_decay=25e-5, num_epochs=40,
                  train_fraction=0.9, num_workers=2, pin_memory=True):
 
         self.dataset_lock = Lock()
@@ -48,31 +50,25 @@ class ModelTrainer:
         if epochs is not None:
             self.num_epochs = epochs
         for epoch in range(self.num_epochs):
-
             # Training phase
             self.model.train()
             # Initialize metrics
             total_train_loss, total_train_correct, total_train = 0, 0, 0
             total_val_loss, total_val_correct, total_val = 0, 0, 0
-
             self.start_loading_thread(0)
             self.loading_thread.join()
-
             for file_index in range(self.dataset_size):
                 with self.dataset_lock:
                     train_dataset, val_dataset = self.current_dataset
-                # Split into train and validation sets
+
                 train_loader = DataLoader(train_dataset, batch_size=self.batch_size, shuffle=True,
                                           num_workers=self.num_workers, pin_memory=self.pin_memory)
                 val_loader = DataLoader(val_dataset, batch_size=self.batch_size, shuffle=False,
                                         num_workers=self.num_workers, pin_memory=self.pin_memory)
 
-                # Start pre-loading the next dataset
                 if file_index + 1 < self.dataset_size and not self.stop_thread:
                     self.start_loading_thread(file_index + 1)
 
-                # Training phase
-                self.model.train()
                 for X_batch, y_batch in train_loader:
                     X_batch, y_batch = X_batch.to(self.device), y_batch.to(self.device)
                     self.optimizer.zero_grad()
@@ -86,7 +82,6 @@ class ModelTrainer:
                     total_train_correct += (preds == y_batch).sum().item()
                     total_train += y_batch.size(0)
 
-                # Validation phase
                 self.model.eval()
                 with torch.no_grad():
                     for X_batch, y_batch in val_loader:
@@ -101,7 +96,6 @@ class ModelTrainer:
                 del train_dataset, val_dataset, train_loader, val_loader
                 torch.cuda.empty_cache()
 
-                # Calculate average loss and accuracy for the epoch
             avg_train_loss = total_train_loss / total_train
             avg_val_loss = total_val_loss / total_val
             train_accuracy = total_train_correct / total_train
@@ -112,7 +106,6 @@ class ModelTrainer:
             self.val_losses.append(avg_val_loss)
             self.val_accuracies.append(val_accuracy)
 
-            # Print formatted output for progress
             print(f'Epoch [{epoch + 1}/{self.num_epochs}]')
             print(f'{"Metric":<15} {"Train":<15} {"Validation":<15}')
             print(f'{"Loss":<15} {avg_train_loss:<15.4f} {avg_val_loss:<15.4f}')

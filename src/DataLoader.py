@@ -25,7 +25,7 @@ class DataLoader:
         self.image_column = image_column
         self.target_column = target_column
         self.transform = transforms.Compose([
-            transforms.Resize((450, 450)),
+            transforms.Resize((128, 128)),
             transforms.ToTensor(),
         ])
         self.encoder = LabelEncoder()
@@ -60,6 +60,7 @@ class DataLoader:
         image_path = os.path.join(self.images_dir, image_name) + ".jpg"
         image = Image.open(image_path).convert('RGB')  # Assuming images are in RGB
         image = self.transform(image)
+        print(f"Loaded image shape: {image.shape}")  # Should output torch.Size([3, 128, 128])
         return image
 
     def train_test_split_tensor(self, train_size=0.8):
